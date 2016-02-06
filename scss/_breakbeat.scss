@@ -10,6 +10,8 @@ $breakpoints: (
   xxlarge: 1440px,
 ) !default;
 
+$breakpoint_classes: map_keys($breakpoints) !default;
+
 @function bb_adjacent_breakpoint($breakpoint_name, $direction, $is_height: false) {
   $breakpoints_set: $breakpoints;
   @if $is_height and variable_exists(y_breakpoints) {

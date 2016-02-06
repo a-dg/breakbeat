@@ -28,7 +28,7 @@ $output_em_queries: true; // Outputs px if false
 $global_font_size: 16px;
 ```
 
-Define your breakpoints, using the minimum width value for each range. Breakpoints must be defined in ascending order, and the first value should almost certainly be `0`.
+Define your breakpoints, using the minimum width value for each range, just as you would for [customizing Foundation 6](http://foundation.zurb.com/sites/docs/media-queries.html#changing-the-breakpoints). Breakpoints must be defined in ascending order, and the first value should almost certainly be `0`.
 
 ```scss
 $breakpoints: (
@@ -40,6 +40,8 @@ $breakpoints: (
   xlarge: 1280px,
 );
 ```
+
+> Foundation lets you specify [which breakpoints get CSS classes](http://foundation.zurb.com/sites/docs/media-queries.html#changing-the-breakpoints). If you don’t define these explicitly, `breakbeat()` will ask Foundation to generate classes for everything in `$breakpoints`.
 
 Optionally define a separate set of height breakpoints, using the same guidelines as the width breakpoints. Height breakpoints are completely separate from width breakpoints, so their names and values can be the same or totally different, it doesn’t matter.
 
@@ -96,7 +98,7 @@ For [height media queries](#height-media-queries), specify the axis as `y` or `h
 
 Note that the `>` and `<` operators *exclude* the breakpoint passed to the mixin. For example, `b('>= small')` will include the entire `small` breakpoint within its range, but `b('> small')` — *greater than small* — will begin with the bottom end of the next largest breakpoint, excluding `small` entirely. If the next largest breakpoint is `medium`, then `b('> small')` will produce a result identical to `b('>= medium')`.
 
-### Between operator
+#### Between operator
 
 The `><` operator takes two breakpoint names as arguments, and includes both of them within the resulting range. In the following example, the entire span of `small`, `medium`, and `average` breakpoints are included in the resulting media query. The next largest breakpoint, `large`, has a minimum width of `1024px`, so the top end of `average` is the maximum, at `1023px`.
 
