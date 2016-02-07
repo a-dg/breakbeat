@@ -245,7 +245,7 @@ $breakpoint_classes: map_keys($breakpoints) !default;
     @if $allow_null {
       @return null;
     }
-    @return '(min-#{$property}: 0)';
+    @return unquote('(min-#{$property}: 0)');
   }
   @return unquote('(#{$media_query})');
 }
