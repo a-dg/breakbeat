@@ -21,14 +21,14 @@ It’s usually as simple as this:
 
 ## Configuration
 
-Begin by setting the media query output type, and the global font size. The font size can be expressed as either pixels or a percentage.
+**Step 1:** Begin by setting the media query output type, and the global font size. The font size can be expressed as either pixels or a percentage.
 
 ```scss
 $output_em_queries: true; // Outputs px if false
 $global_font_size: 16px;
 ```
 
-Define your breakpoints, using the minimum width value for each range, just as you would for [customizing Foundation 6](http://foundation.zurb.com/sites/docs/media-queries.html#changing-the-breakpoints). Breakpoints must be defined in ascending order, and the first value should almost certainly be `0`.
+**Step 2:** Define your breakpoints, using the minimum width value for each range, just as you would for [customizing Foundation 6](http://foundation.zurb.com/sites/docs/media-queries.html#changing-the-breakpoints). Breakpoints must be defined in ascending order, and the first value should almost certainly be `0`.
 
 ```scss
 $breakpoints: (
@@ -43,7 +43,7 @@ $breakpoints: (
 
 > Foundation lets you specify [which breakpoints get CSS classes](http://foundation.zurb.com/sites/docs/media-queries.html#changing-the-breakpoints). If you don’t define these explicitly, `breakbeat()` will ask Foundation to generate classes for everything in `$breakpoints`.
 
-Optionally define a separate set of height breakpoints as `$h_breakpoints` or `$y_breakpoints`, using the same guidelines as the width breakpoints. Height breakpoints are completely separate from width breakpoints, so their names and values can be the same or totally different, it doesn’t matter.
+**Step 3:** Optionally define a separate set of height breakpoints as `$h_breakpoints` or `$y_breakpoints`, using the same guidelines as the width breakpoints. Height breakpoints are completely separate from width breakpoints, so their names and values can be the same or totally different, it doesn’t matter.
 
 ```scss
 $h_breakpoints: (
@@ -53,7 +53,7 @@ $h_breakpoints: (
 );
 ```
 
-Finally, import [_breakbeat.scss](scss/_breakbeat.scss).
+**Step 4:** Import [_breakbeat.scss](scss/_breakbeat.scss).
 
 ```scss
 @import 'breakbeat';
