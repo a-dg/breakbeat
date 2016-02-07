@@ -1,6 +1,6 @@
 # breakbeat()
 
-The `breakbeat()` mixin allows you to build media queries simply. It is designed to work with [Foundation 6](https://github.com/zurb/foundation-sites), and offers some additional functionality beyond the existing `breakpoint()` mixin provided with Foundation.
+The `breakbeat()` mixin and function allow you to build media queries simply. They are designed to work with [Foundation 6](https://github.com/zurb/foundation-sites), and offer some additional functionality beyond the existing `breakpoint()` mixin and function provided with Foundation.
 
 It’s usually as simple as this:
 
@@ -84,6 +84,14 @@ For [height media queries](#height-media-queries), specify the axis as `y` or `h
 @include b('y >= petite') {}
 ```
 
+#### Function usage
+
+You can use the function to combine `breakbeat()` with other parameters, such as media type.
+
+```scss
+@media print and #{b('>= small')} {}
+```
+
 
 ## Comparison operators
 
@@ -96,7 +104,7 @@ For [height media queries](#height-media-queries), specify the axis as `y` or `h
 - `=`, `==`, `===`: equal to (results in both `min-width` and `max-width` for a single breakpoint)
 - `><`: between (results in `min-width` and `max-width` for multiple breakpoints)
 
-Note that the `>` and `<` operators *exclude* the breakpoint passed to the mixin. For example, `b('>= small')` will include the entire `small` breakpoint within its range, but `b('> small')` — *greater than small* — will begin with the bottom end of the next largest breakpoint, excluding `small` entirely. If the next largest breakpoint is `medium`, then `b('> small')` will produce a result identical to `b('>= medium')`.
+Note that the `>` and `<` operators *exclude* the specified breakpoint. For example, `b('>= small')` will include the entire `small` breakpoint within its range, but `b('> small')` — *greater than small* — will begin with the bottom end of the next largest breakpoint, excluding `small` entirely. If the next largest breakpoint is `medium`, then `b('> small')` will produce a result identical to `b('>= medium')`.
 
 #### Between operator
 
@@ -194,7 +202,7 @@ There are endless possibilities for quickly tweaking problem areas within specif
 
 ## Querial detritus
 
-Media queries are automatically corrected or weeded out if they don’t make any sense. Here are some example nonsensical arguments, and the resulting media queries.
+When using the mixin, media queries are automatically corrected or weeded out if they don’t make any sense. Here are some example nonsensical arguments, and the resulting media queries.
 
 ```scss
 $breakpoints: (
@@ -209,6 +217,12 @@ $breakpoints: (
 @include b('> large')          // @media (min-width: 800px)
 @include b('>< small large')   // No media query
 @include b('>< medium large')  // @media (min-width: 600px)
+```
+
+The function produces the same succinct expressions as the mixin, but it cannot filter out unnecessary media queries, since it is used as part of a media query definition. If `breakbeat()` finds that a function call will result in an unnecessary expression, it will instead return `(min-[property]: 0)`, which is meaningless but error-free.
+
+```scss
+@media #{b('>= small')}        // @media (min-width: 0)
 ```
 
 

@@ -59,3 +59,10 @@ $desktop_nav: medium;
     width: 100%;
   }
 }
+
+// Use the function to combine other parameters
+@media print and #{b('= medium')} {
+  main {
+    background: #fff;
+  }
+}
