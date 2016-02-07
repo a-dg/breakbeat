@@ -43,10 +43,10 @@ $breakpoints: (
 
 > Foundation lets you specify [which breakpoints get CSS classes](http://foundation.zurb.com/sites/docs/media-queries.html#changing-the-breakpoints). If you don’t define these explicitly, `breakbeat()` will ask Foundation to generate classes for everything in `$breakpoints`.
 
-Optionally define a separate set of height breakpoints, using the same guidelines as the width breakpoints. Height breakpoints are completely separate from width breakpoints, so their names and values can be the same or totally different, it doesn’t matter.
+Optionally define a separate set of height breakpoints as `$h_breakpoints` or `$y_breakpoints`, using the same guidelines as the width breakpoints. Height breakpoints are completely separate from width breakpoints, so their names and values can be the same or totally different, it doesn’t matter.
 
 ```scss
-$y_breakpoints: (
+$h_breakpoints: (
   wee: 0,
   petite: 300px,
   medium: 460px,
@@ -78,10 +78,10 @@ There’s also a handy shortcut:
 @include b('>= small') {}
 ```
 
-For [height media queries](#height-media-queries), specify the axis as `y` or `h`. (For width media queries, specifying `x` or `w` will work, but they’re optional.)
+For [height media queries](#height-media-queries), specify the axis as `h` or `y`. (For width media queries, specifying `w` or `x` will work, but they’re optional.)
 
 ```scss
-@include b('y >= petite') {}
+@include b('h >= petite') {}
 ```
 
 #### Function usage
@@ -121,13 +121,15 @@ The `><` operator takes two breakpoint names as arguments, and includes both of 
 
 ## Height media queries
 
-For height media queries, specify the axis as `y` or `h` before the comparison operator.
+For height media queries, specify the axis as `h` or `y` before the comparison operator.
 
 ```scss
-@include b('y >= petite') {}
+@include b('h >= petite') {}
 ```
 
-If you store a separate set of height breakpoints as `$y_breakpoints`, those will be used for all height media queries. If there is no separate set of height breakpoints, `breakbeat()` will use the same names and values specified in the standard `$breakpoints` variable.
+If you store a separate set of height breakpoints as `$h_breakpoints` or `$y_breakpoints`, those will be used for all height media queries. If there is no separate set of height breakpoints, `breakbeat()` will use the same names and values specified in the standard `$breakpoints` variable.
+
+>  The axis abbreviation does not have to match the variable name you use for height breakpoints. You can use `h` with `$y_breakpoints` and it will all work out in the end.
 
 
 ## Scaling ranges

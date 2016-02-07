@@ -14,8 +14,8 @@ $breakpoint_classes: map_keys($breakpoints) !default;
 
 @function bb_adjacent_breakpoint($breakpoint_name, $direction, $is_height: false) {
   $breakpoints_set: $breakpoints;
-  @if $is_height and variable_exists(y_breakpoints) {
-    $breakpoints_set: $y_breakpoints;
+  @if $is_height {
+    $breakpoints_set: set_height_breakpoints_set();
   }
   $current_index: index(map_keys($breakpoints_set), $breakpoint_name);
   @if $current_index == null {
@@ -69,6 +69,15 @@ $breakpoint_classes: map_keys($breakpoints) !default;
     $breakpoint: str_slice($breakpoint, str_index($breakpoint, ' ') + 1);
   }
   @return $breakpoint;
+}
+@function set_height_breakpoints_set() {
+  $breakpoints_set: $breakpoints;
+  @if variable_exists(h_breakpoints) {
+    $breakpoints_set: $h_breakpoints;
+  } @else if variable_exists(y_breakpoints) {
+    $breakpoints_set: $y_breakpoints;
+  }
+  @return $breakpoints_set;
 }
 @function bb_percent_to_px($value) {
   @if unitless($value) {
@@ -132,9 +141,7 @@ $breakpoint_classes: map_keys($breakpoints) !default;
   $property: bb_get_property($breakpoint);
   @if $property == 'height' {
     $is_height: true;
-    @if variable_exists(y_breakpoints) {
-      $breakpoints_set: $y_breakpoints;
-    }
+    $breakpoints_set: set_height_breakpoints_set();
   }
   $breakpoint: bb_remove_property($breakpoint);
   @if str_index($breakpoint, ' ') == null {
