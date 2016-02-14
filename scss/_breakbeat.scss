@@ -1,5 +1,5 @@
 $output_em_queries: true !default;
-$global_font_size: 16px !default;
+$base_em_size: 16px;
 
 // Foundation defaults
 $breakpoints: (
@@ -79,16 +79,6 @@ $breakpoint_classes: map_keys($breakpoints) !default;
   }
   @return $breakpoints_set;
 }
-@function bb_percent_to_px($value) {
-  @if unitless($value) {
-    $value: ($value * 1px);
-  }
-  @if unit($value) != '%' {
-    @return $value;
-  }
-  $default_global_font_size: 16px;
-  @return (bb_strip_units($value / 100) * $default_global_font_size);
-}
 @function bb_px_to_em($value) {
   @if bb_is_zero($value) {
     @return 0;
@@ -99,8 +89,7 @@ $breakpoint_classes: map_keys($breakpoints) !default;
   @if unit($value) != 'px' {
     @return $value;
   }
-  $global_font_size_px: bb_percent_to_px($global_font_size);
-  $em: (round(($value / $global_font_size_px) * 10000) / 10000);
+  $em: (round(($value / $base_em_size) * 10000) / 10000);
   @return ($em * 1em);
 }
 @function bb_em_to_px($value) {
@@ -113,8 +102,7 @@ $breakpoint_classes: map_keys($breakpoints) !default;
   @if unit($value) != 'em' {
     @return $value;
   }
-  $global_font_size_px: bb_percent_to_px($global_font_size);
-  $px: (($value / 1em) * $global_font_size_px);
+  $px: (($value / 1em) * $base_em_size);
   @return $px;
 }
 @function bb_is_zero($value) {

@@ -21,14 +21,13 @@ It’s usually as simple as this:
 
 ## Configuration
 
-**Step 1:** Begin by setting the media query output type, and the global font size. The font size can be expressed as either pixels or a percentage.
+**Step 1:** Begin by setting the media query output type.
 
 ```scss
 $output_em_queries: true; // Outputs px if false
-$global_font_size: 16px;
 ```
 
-**Step 2:** Define your breakpoints, using the minimum width value for each range, just as you would for [customizing Foundation 6](http://foundation.zurb.com/sites/docs/media-queries.html#changing-the-breakpoints). Breakpoints must be defined in ascending order, and the first value should almost certainly be `0`.
+**Step 2:** Define your breakpoints, using the minimum width value for each range, just as you would for [customizing Foundation 6](http://foundation.zurb.com/sites/docs/media-queries.html#changing-the-breakpoints). Breakpoints must be defined in ascending order, and the first value should almost certainly be `0`. (You can define this in your Foundation settings file or separately, as long as it comes before other SCSS files.)
 
 ```scss
 $breakpoints: (
@@ -53,9 +52,10 @@ $h_breakpoints: (
 );
 ```
 
-**Step 4:** Import [_breakbeat.scss](scss/_breakbeat.scss).
+**Step 4:** Import your Foundation settings file, *and then* [_breakbeat.scss](scss/_breakbeat.scss), thereby allowing it to use what you’ve already defined.
 
 ```scss
+@import 'settings'; // Foundation settings
 @import 'breakbeat';
 ```
 
