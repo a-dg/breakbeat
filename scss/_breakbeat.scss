@@ -56,27 +56,32 @@ $breakpoint_classes: map_keys($breakpoints) !default;
 @function bb_next_breakpoint_name($breakpoint_name, $is_height) {
   @return bb_adjacent_breakpoint_name($breakpoint_name, 1, $is_height);
 }
+@function bb_get_first_word($string) {
+  $first_word_end_index: str_index($string, ' ');
+  @if $first_word_end_index == null {
+    @return null;
+  }
+  $first_word: str_slice($string, 1, $first_word_end_index - 1);
+  @return $first_word;
+}
 @function bb_get_property($breakpoint) {
   $property: 'width';
-  $first_letter: str_slice($breakpoint, 1, 1);
-  @if index(('h', 'y'), $first_letter) {
+  @if bb_get_first_word($breakpoint) == 'height' {
     $property: 'height';
   }
   @return $property;
 }
 @function bb_remove_property($breakpoint) {
-  $first_letter: str_slice($breakpoint, 1, 1);
-  @if index(('w', 'x', 'h', 'y'), $first_letter) {
+  $first_word: bb_get_first_word($breakpoint);
+  @if index(('width', 'height'), $first_word) {
     $breakpoint: str_slice($breakpoint, str_index($breakpoint, ' ') + 1);
   }
   @return $breakpoint;
 }
 @function set_height_breakpoints_set() {
   $breakpoints_set: $breakpoints;
-  @if variable_exists(h_breakpoints) {
-    $breakpoints_set: $h_breakpoints;
-  } @else if variable_exists(y_breakpoints) {
-    $breakpoints_set: $y_breakpoints;
+  @if variable_exists(height_breakpoints) {
+    $breakpoints_set: $height_breakpoints;
   }
   @return $breakpoints_set;
 }
