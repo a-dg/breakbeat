@@ -15,7 +15,7 @@ $breakpoints: (
 );
 
 // Optionally define height breakpoints
-$y_breakpoints: (
+$height_breakpoints: (
   wee: 0,
   petite: 300px,
   medium: 480px,
@@ -44,7 +44,7 @@ p {
     line-height: 1.6;
     
     // Nest queries within each other
-    @include b('h >= petite') {
+    @include b('height >= petite') {
       background: #000;
     }
   }
