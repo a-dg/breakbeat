@@ -175,7 +175,7 @@ $breakpoint_classes: map_keys($breakpoints) !default;
       $next_size: round($breakpoint_size + (($next_size - $breakpoint_size) * $scale));
     }
     @if $next_size != $breakpoint_size {
-      $next_size: ($next_size - 1px);
+      $next_size: (bb_em_to_px($next_size) - 1px);
       @if $output_em_queries {
         $next_size: bb_px_to_em($next_size);
       }
@@ -189,7 +189,7 @@ $breakpoint_classes: map_keys($breakpoints) !default;
     @if $breakpoint_size <= 0 {
       $breakpoint_size: bb_next_breakpoint_size($breakpoint_name, $is_height);
     }
-    $breakpoint_size: ($breakpoint_size - 1px);
+    $breakpoint_size: (bb_em_to_px($breakpoint_size) - 1px);
     @if $output_em_queries {
       $breakpoint_size: bb_px_to_em($breakpoint_size);
     }
@@ -202,7 +202,7 @@ $breakpoint_classes: map_keys($breakpoints) !default;
     $second_name: str_slice($breakpoint_name, str_index($breakpoint_name, ' ') + 1);
     $breakpoint_size: map_get($breakpoints_set, $first_name);
     $next_name: bb_next_breakpoint_name($second_name, $is_height);
-    $next_size: (bb_next_breakpoint_size($second_name, $is_height) - 1px);
+    $next_size: (bb_em_to_px(bb_next_breakpoint_size($second_name, $is_height)) - 1px);
     @if $output_em_queries {
       $breakpoint_size: bb_px_to_em($breakpoint_size);
       $next_size: bb_px_to_em($next_size);
@@ -224,7 +224,7 @@ $breakpoint_classes: map_keys($breakpoints) !default;
     } @else if $scale > 0 {
       $breakpoint_size: round($breakpoint_size + (($next_size - $breakpoint_size) * $scale));
     }
-    $next_size: ($next_size - 1px);
+    $next_size: (bb_em_to_px($next_size) - 1px);
     @if $output_em_queries {
       $breakpoint_size: bb_px_to_em($breakpoint_size);
       $next_size: bb_px_to_em($next_size);
