@@ -1,5 +1,6 @@
 $output_em_queries: true !default;
 $base_em_size: 16px;
+$output_query_comments: true !default;
 
 // Foundation defaults
 $breakpoints: (
@@ -256,11 +257,13 @@ $breakpoint_classes: map_keys($breakpoints) !default;
   $breakpoint: bb_remove_property($breakpoint);
   @if $media_query != null {
     @media #{$media_query} {
-      $report: $breakpoint;
-      @if $scale != 0 {
-        $report: $report + ', scale ' + $scale;
+      @if $output_query_comments {
+        $report: $breakpoint;
+        @if $scale != 0 {
+          $report: $report + ', scale ' + $scale;
+        }
+        /* #{$property} #{$report} */
       }
-      /* #{$property} #{$report} */
       @content;
     }
   } @else {
