@@ -110,6 +110,7 @@ Breakbeat uses common comparison operators to isolate media queries to a specifi
 - `<`: less than (results in `max-width`, using the next smallest breakpoint)
 - `=`, `==`, `===`: equal to (results in both `min-width` and `max-width` for a single breakpoint)
 - `><`: between (results in `min-width` and `max-width` for multiple breakpoints)
+- `<>`: outside (results in `max-width, min-width` for one or more breakpoints)
 
 Note that the `>` and `<` operators *exclude* the specified breakpoint. For example, `b('>= small')` will include the entire `small` breakpoint within its range, but `b('> small')` — *greater than small* — will begin with the bottom end of the next largest breakpoint, excluding `small` entirely. If the next largest breakpoint is `medium`, then `b('> small')` will produce a result identical to `b('>= medium')`.
 
@@ -123,6 +124,18 @@ The `><` operator takes two breakpoint names as arguments, and includes both of 
 
 // Output
 @media (min-width: 460px) and (max-width: 1023px) {}
+```
+
+#### Outside operator
+
+The `<>` operator takes one or two breakpoint names as arguments, and excludes them (and the space between) from the resulting range. Using a single breakpoint name excludes just that one breakpoint. In the following example, the range between `medium` and `average` breakpoints is excluded from the resulting media query.
+
+```scss
+// Everything outside of medium through average
+@include b('<> medium average') {}
+
+// Output
+@media (max-width: 639px), (min-width: 1024px) {}
 ```
 
 
