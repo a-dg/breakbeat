@@ -1,4 +1,4 @@
-Copyright (c) 2016 Alan Dague-Greene
+Copyright (c) 2022 Alan Greene
 
 # The MIT License (MIT)
 
