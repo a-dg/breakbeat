@@ -1,8 +1,6 @@
 // Set output type
-$output_em_queries: true;
-
-// Set global font size
-$global_font_size: 16px;
+$output_em_queries: false;
+$output_query_comments: true;
 
 // Define minimum widths for breakpoints
 $breakpoints: (
@@ -12,16 +10,16 @@ $breakpoints: (
   average: 820px,
   large: 1024px,
   xlarge: 1280px,
+  
+  // Optionally define height breakpoints
+  height: (
+    wee: 0,
+    petite: 300px,
+    medium: 480px,
+  ),
 );
 
-// Optionally define height breakpoints
-$height_breakpoints: (
-  wee: 0,
-  petite: 300px,
-  medium: 480px,
-);
-
-// Import mixin
+// Import Breakbeat mixin and function
 @import 'breakbeat';
 
 // Nest queries within elements, or vice versa
@@ -39,7 +37,7 @@ p {
     color: #00f;
   }
   
-  // Pass two breakpoints to the between operator
+  // Pass two breakpoints to the between and outside operators
   @include b('>< medium large') {
     line-height: 1.6;
     

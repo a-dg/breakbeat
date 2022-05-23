@@ -1,22 +1,19 @@
 # Breakbeat
 
-The Breakbeat mixin and function allow you to build media queries simply. They are designed to work with [Foundation 6](https://github.com/zurb/foundation-sites), and offer some additional functionality beyond the existing `breakpoint()` mixin and function provided with Foundation.
-
-It’s usually as simple as this:
+Breakbeat allows you to build media queries simply. It’s usually as simple as this:
 
 ```scss
-@include b('>= large') {}
+@include b(large) {}
 ```
 
 
 ## Capabilities
 
 - Generate media queries for width and height
-- Use breakpoint names and values already defined for use within Foundation
 - Succinctly specify ranges between named breakpoints
 - Scale breakpoint values to target portions of breakpoints
 - Automatically filter out meaningless rules, like `(min-width: 0)`
-- Output rules as `em` (the default) or `px`
+- Output media queries as `px` (the default) or `em`
 
 
 ## Configuration
@@ -27,7 +24,7 @@ It’s usually as simple as this:
 $output_em_queries: true; // Outputs px if false
 ```
 
-**Step 2:** Define your breakpoints, using the minimum width value for each range, just as you would for [customizing Foundation 6](http://foundation.zurb.com/sites/docs/media-queries.html#changing-the-breakpoints). Breakpoints must be defined in ascending order, and the first value should be `0`. (You can define this within your Foundation settings file or after it, as long as it comes before Foundation itself.)
+**Step 2:** Define your breakpoints, using the minimum width value for each range. Breakpoints must be defined in ascending order, and the first value should be `0`. (You can define this within your Foundation settings file or after it, as long as it comes before Foundation itself.)
 
 ```scss
 $breakpoints: (
@@ -40,30 +37,28 @@ $breakpoints: (
 );
 ```
 
-**Step 3:** Specify [which breakpoints get CSS classes](http://foundation.zurb.com/sites/docs/media-queries.html#changing-the-breakpoints). Unlike when using Foundation out of the box, this step is required for Breakbeat to work properly.
+**Step 3:** Optionally define a separate set of height breakpoints in the key `height` within `$breakpoints`, using the same guidelines as the width breakpoints. Height breakpoints are completely separate from width breakpoints, so their names and values can be the same or totally different, it doesn’t matter.
 
 ```scss
-$breakpoint_classes: (tiny small medium average large xlarge);
-```
-
-**Step 4:** Update `$grid-column-responsive-gutter` and `$header-sizes` in your Foundation settings to match your breakpoint names. The first breakpoint in each of these maps *must* match your smallest breakpoint name.
-
-**Step 5:** Optionally define a separate set of height breakpoints as `$height_breakpoints`, using the same guidelines as the width breakpoints. Height breakpoints are completely separate from width breakpoints, so their names and values can be the same or totally different, it doesn’t matter.
-
-```scss
-$height_breakpoints: (
-  wee: 0,
-  petite: 300px,
-  medium: 460px,
+$breakpoints: (
+  tiny: 0,
+  small: 460px,
+  medium: 640px,
+  average: 820px,
+  large: 1024px,
+  xlarge: 1280px,
+  height: (
+    wee: 0,
+    petite: 300px,
+    medium: 480px,
+  ),
 );
 ```
 
-**Step 6:** Import your Foundation settings file, then `_breakbeat.scss`, then Foundation itself.
+**Step 4:** Import the Breakbeat mixin and function.
 
 ```scss
-@import 'settings'; // Foundation settings
 @import 'breakbeat';
-@import '../path/to/foundation';
 ```
 
 
@@ -79,16 +74,22 @@ To use the mixin, specify a [comparison operator](#comparison-operators), follow
 @media (min-width: 460px) {}
 ```
 
-There’s also a handy shortcut:
+The `>=` operator is the default (targeting the specified breakpoint *and larger*), and can be omitted, along with the quotes around the input string. There’s also a handy `b` shortcut:
 
 ```scss
-@include b('>= small') {}
+@include b(small) {}
 ```
 
-For [height media queries](#height-media-queries), specify the axis as `height`. (For width media queries, specifying `width` will work, but it’s not necessary.)
+For [height media queries](#height-media-queries), specify the axis as `height`, `h`, or `y`. (For width media queries, specifying `width`, `w`, or `x` will work, but it’s not necessary.)
 
 ```scss
 @include b('height >= petite') {}
+```
+
+You’ll usually want to refer to breakpoints by their names, but you can also pass arbitrary numerical values:
+
+```scss
+@include b(800px) {}
 ```
 
 #### Function usage
@@ -96,21 +97,23 @@ For [height media queries](#height-media-queries), specify the axis as `height`.
 You can use the function to combine Breakbeat with other parameters, such as media type.
 
 ```scss
-@media print and #{b('>= small')} {}
+@media print and #{b(small)} {}
 ```
 
 
 ## Comparison operators
 
-Breakbeat uses common comparison operators to isolate media queries to a specific range, with one addition:
+Breakbeat uses common comparison operators to isolate media queries to a specific range, with two additions:
 
-- `>=`: greater than or equal to (results in `min-width`)
-- `<=`: less than or equal to (results in `max-width`)
-- `>`: greater than (results in `min-width`, using the next largest breakpoint)
-- `<`: less than (results in `max-width`, using the next smallest breakpoint)
-- `=`, `==`, `===`: equal to (results in both `min-width` and `max-width` for a single breakpoint)
-- `><`: between (results in `min-width` and `max-width` for multiple breakpoints)
-- `<>`: outside (results in `max-width, min-width` for one or more breakpoints)
+- `>=`: Greater than or equal to (results in `min-width`)
+- `<=`: Less than or equal to (results in `max-width`)
+- `>`: Greater than (results in `min-width`, using the next largest breakpoint)
+- `<`: Less than (results in `max-width`, using the next smallest breakpoint)
+- `=`, `==`, `===`: Equal to (results in both `min-width` and `max-width` for a single breakpoint)
+- `><`: [Between](#between-operator) (results in `min-width` and `max-width` for multiple breakpoints)
+- `<>`: [Outside](#outside-operator) (results in `max-width, min-width` for one or more breakpoints)
+
+The `>=` operator is the default, and can be omitted.
 
 Note that the `>` and `<` operators *exclude* the specified breakpoint. For example, `b('>= small')` will include the entire `small` breakpoint within its range, but `b('> small')` — *greater than small* — will begin with the bottom end of the next largest breakpoint, excluding `small` entirely. If the next largest breakpoint is `medium`, then `b('> small')` will produce a result identical to `b('>= medium')`.
 
@@ -141,13 +144,26 @@ The `<>` operator takes one or two breakpoint names as arguments, and excludes t
 
 ## Height media queries
 
-For height media queries, specify the axis as `height` before the comparison operator.
+For height media queries, specify the axis as `height`, `h`, or `y` before the comparison operator.
 
 ```scss
 @include b('height >= petite') {}
 ```
 
-If you store a separate set of height breakpoints as `$height_breakpoints`, those will be used for all height media queries. If there is no separate set of height breakpoints, Breakbeat will use the same names and values specified in the standard `$breakpoints` variable.
+If you store a separate set of height breakpoints in the key `height` within `$breakpoints`, those will be used for all height media queries. If there is no separate set of height breakpoints, Breakbeat will use the same names and values specified in the standard `$breakpoints` variable.
+
+```scss
+$breakpoints: (
+  small: 0,
+  medium: 640px,
+  large: 1024px,
+  height: (
+    wee: 0,
+    petite: 300px,
+    medium: 480px,
+  ),
+);
+```
 
 
 ## Scaling ranges
@@ -179,7 +195,7 @@ To target the upper half of `small`, we scale the range by `0.5`:
 @media (min-width: 300px) and (max-width: 599px) {}
 ```
 
-The result is that we’ve narrowed the range of the media query to affect only the upper half of the range normally covered by `small`.
+The result is that we’ve narrowed the range of the media query to affect only the upper half of the range normally covered by `small`. (We know it’s the *upper* half, because we’re using a positive value for `scale`.)
 
 The same technique applied to the `medium` breakpoint results in a much smaller range, since its distance from the `large` breakpoint is smaller:
 
@@ -220,9 +236,21 @@ There are endless possibilities for quickly tweaking problem areas within specif
 >  Since scaling controls deviation from the initial value, scaling by `0` does not obliterate the breakpoint through multiplication, but alters it by a factor of `0`, just as if the `scale` argument were omitted. Likewise, scaling by `1` does not multiply the value by `1`, but rather offsets the initial value by `100%`.
 
 
+## Breakpoint name interpolation
+
+Since breakpoint names are passed to Breakbeat as part of a quoted string, you can easily use meaningful variable names to identify the purpose of a media query, and enable sweeping changes to transition points.
+
+```scss
+$mobile_nav: tiny;
+$tablet_nav: small;
+$desktop_nav: medium;
+@include b('>= #{$desktop_nav}') {}
+```
+
+
 ## Querial detritus
 
-When using the mixin, media queries are automatically corrected or weeded out if they don’t make any sense. Here are some example nonsensical arguments, and the resulting media queries.
+When using the mixin, media queries are automatically simplified or weeded out if they don’t make sense. Here are some example nonsensical arguments, and the resulting media queries.
 
 ```scss
 $breakpoints: (
@@ -243,16 +271,4 @@ The function produces the same succinct expressions as the mixin, but it cannot 
 
 ```scss
 @media #{b('>= small')}        // @media (min-width: 0)
-```
-
-
-## Breakpoint name interpolation
-
-Since breakpoint names are passed to Breakbeat as part of a quoted string, you can easily use meaningful variable names to identify the purpose of a media query, and enable sweeping changes to transition points.
-
-```scss
-$mobile_nav: tiny;
-$tablet_nav: small;
-$desktop_nav: medium;
-@include b('>= #{$desktop_nav}') {}
 ```
