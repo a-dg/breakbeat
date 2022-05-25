@@ -281,7 +281,8 @@ $b_height_property_markers: ('height', 'h', 'y');
   @if meta.type_of($number) == number and not unitless($number) {
     $num_length: string.length(#{$number});
     $unit_length: string.length(unit($number));
-    @return string.slice(#{$number}, 1, ($num_length - $unit_length));
+    $unitless: string.slice(#{$number}, 1, ($num_length - $unit_length));
+    @return b_convert_to_number($unitless);
   }
   // @warn '"#{$number}" is not a number, or it does not have any units to strip away.';
   @return $number;
