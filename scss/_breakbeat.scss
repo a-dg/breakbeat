@@ -579,9 +579,11 @@ $b_height_property_markers: ('height', 'h', 'y');
       and $second_name != $next_name
     {
       $media_query: 'max-#{$axis_property}: #{$next_size}';
-    } @else if $next_name != $first_name
+    } @else if
+      $next_name != $first_name
       and $breakpoint_size < $next_size
-      and $second_name != $next_name {
+      and $second_name != $next_name
+    {
       $media_query: 'min-#{$axis_property}: #{$breakpoint_size}) and (max-#{$axis_property}: #{$next_size}';
     } @else if not b_is_zero($breakpoint_size) {
       $media_query: 'min-#{$axis_property}: #{$breakpoint_size}';
@@ -611,9 +613,11 @@ $b_height_property_markers: ('height', 'h', 'y');
       and $second_name != $upper_range_name
     {
       $media_query: 'min-#{$axis_property}: #{$upper_range_size}';
-    } @else if $upper_range_name != $first_name
+    } @else if
+      $upper_range_name != $first_name
       and $lower_range_size < $upper_range_size
-      and $second_name != $upper_range_name {
+      and $second_name != $upper_range_name
+    {
       $media_query: 'max-#{$axis_property}: #{$lower_range_size}), (min-#{$axis_property}: #{$upper_range_size}';
     } @else if not b_is_zero($lower_range_size) {
       $media_query: 'max-#{$axis_property}: #{$lower_range_size}';
@@ -638,8 +642,10 @@ $b_height_property_markers: ('height', 'h', 'y');
     
     @if b_is_zero($breakpoint_size) {
       $media_query: 'max-#{$axis_property}: #{$next_size}';
-    } @else if $next_name != $breakpoint_name
-      and $breakpoint_size < $next_size {
+    } @else if
+      $next_name != $breakpoint_name
+      and $breakpoint_size < $next_size
+    {
       $media_query: 'min-#{$axis_property}: #{$breakpoint_size}) and (max-#{$axis_property}: #{$next_size}';
     } @else {
       $media_query: 'min-#{$axis_property}: #{$breakpoint_size}';
