@@ -1,26 +1,26 @@
-// Set output type
-$output_em_queries: false;
-$output_query_comments: true;
+@use 'breakbeat' as *;
 
-// Define minimum widths for breakpoints
-$breakpoints: (
-  tiny: 0,
-  small: 460px,
-  medium: 640px,
-  average: 820px,
-  large: 1024px,
-  xlarge: 1280px,
-  
-  // Optionally define height breakpoints
-  height: (
-    wee: 0,
-    petite: 300px,
-    medium: 480px,
+@include configure((
+  breakpoints: (
+    tiny: 0,
+    small: 460px,
+    medium: 640px,
+    average: 820px,
+    large: 1024px,
+    xlarge: 1280px,
+    
+    // Optionally define height breakpoints
+    height: (
+      wee: 0,
+      petite: 300px,
+      medium: 480px,
+    ),
   ),
-);
-
-// Import Breakbeat mixin and function
-@import 'breakbeat';
+  
+  // Set output type
+  output_em_queries: false,
+  output_query_comments: true,
+));
 
 // Nest queries within elements, or vice versa
 p {
@@ -28,7 +28,7 @@ p {
   color: #f00;
   
   // Basic usage
-  @include b('>= small') {
+  @include b(small) {
     color: #ff0;
   }
   
@@ -52,7 +52,7 @@ p {
 $mobile_nav: tiny;
 $tablet_nav: small;
 $desktop_nav: medium;
-@include b('>= #{$desktop_nav}') {
+@include b($desktop_nav) {
   nav {
     width: 100%;
   }

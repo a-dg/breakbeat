@@ -1,4 +1,4 @@
-// Breakbeat v2.0.3
+// Breakbeat v3.0
 
 @use 'sass:math';
 @use 'sass:string';
@@ -6,72 +6,82 @@
 @use 'sass:map';
 @use 'sass:meta';
 
-$output_em_queries: false !default;
-$output_query_comments: false !default;
-$global_font_size: 16px !default;
-$height_breakpoints_key: 'height' !default;
 
-// Defaults
-$breakpoints: (
-  small: 0,
-  medium: 640px,
-  large: 1024px,
-  xlarge: 1200px,
-  xxlarge: 1440px,
-) !default;
+$breakpoints: ();
 
-$breakpoint_names: map.keys($breakpoints) !default;
+$_config: (
+  breakpoints: (),
+  output_em_queries: false,
+  output_query_comments: false,
+  global_font_size: 16px,
+  height_breakpoints_key: 'height',
+);
 
-$b_width_property_markers: ('width', 'w', 'x');
-$b_height_property_markers: ('height', 'h', 'y');
+$_between_operator: '><';
+$_outside_operator: '<>';
+$_width_property_markers: ('width', 'w', 'x');
+$_height_property_markers: ('height', 'h', 'y');
+$_range_modifier: 0.02px;
 
 
-// /**
-//  * Get size from breakpoint description
-//  * @param {string/number} $breakpoint
-//  * @param {number} $scale
-//  * @return {number}
-//  */
-@function b_size_from_breakpoint($breakpoint, $scale: 0) {
+/// Configure options
+/// @param {map} $params
+@mixin configure($params) {
+  @each $key, $value in $params {
+    $_config: map.set($_config, $key, $value) !global;
+  }
+  $breakpoints: map.get($_config, breakpoints) !global;
+}
+
+
+/// Get value from config
+/// @param {string} $param
+/// @return {mixed} *
+@function _config($param) {
+  @return map.get($_config, $param);
+}
+
+
+/// Get size from breakpoint description
+/// @param {string | number} $breakpoint
+/// @param {number} $scale
+/// @return {number} *
+@function size($breakpoint, $scale: 0) {
   @return breakbeat($breakpoint, $scale, $return_size: true);
 }
 
 
-// /**
-//  * Get height breakpoints map
-//  * @param {map} $breakpoints_map
-//  * @return {map}
-//  */
-@function b_get_height_breakpoints_map($breakpoints_map) {
+/// Get height breakpoints map
+/// @param {map} $breakpoints_map
+/// @return {map} *
+@function _height_breakpoints_map($breakpoints_map) {
   @if
-    not map.has_key($breakpoints_map, $height_breakpoints_key)
-    or list.length(map.get($breakpoints_map, $height_breakpoints_key)) == 0
+    not map.has_key($breakpoints_map, _config(height_breakpoints_key))
+    or list.length(map.get($breakpoints_map, _config(height_breakpoints_key))) == 0
   {
     @return $breakpoints_map;
   }
   
-  @return map.get($breakpoints, $height_breakpoints_key);
+  @return map.get($breakpoints, _config(height_breakpoints_key));
 }
 
 
-// /**
-//  * Get breakpoint adjacent to input breakpoint
-//  * @param {string} $breakpoint_name
-//  * @param {int} $direction
-//  * @param {bool} $is_height
-//  * @return {map}
-//  */
-@function b_adjacent_breakpoint($breakpoint_name, $direction, $is_height: false) {
+/// Get breakpoint adjacent to input breakpoint
+/// @param {string} $breakpoint_name
+/// @param {int} $direction
+/// @param {bool} $is_height
+/// @return {map} *
+@function _adjacent_breakpoint($breakpoint_name, $direction, $is_height: false) {
   $breakpoints_map: $breakpoints;
   @if $is_height {
-    $breakpoints_map: b_get_height_breakpoints_map($breakpoints_map);
+    $breakpoints_map: _height_breakpoints_map($breakpoints_map);
   } @else {
-    $breakpoints_map: map.remove($breakpoints_map, $height_breakpoints_key);
+    $breakpoints_map: map.remove($breakpoints_map, _config(height_breakpoints_key));
   }
   
   $current_index: list.index(map.keys($breakpoints_map), $breakpoint_name);
   @if $current_index == null {
-    @error b_unknown_breakpoint_error($breakpoint_name);
+    @error _unknown_breakpoint_error($breakpoint_name);
   }
   
   $adjacent_index: ($current_index + $direction);
@@ -91,85 +101,71 @@ $b_height_property_markers: ('height', 'h', 'y');
 }
 
 
-// /**
-//  * Get size of breakpoint adjacent to input breakpoint
-//  * @param {string} $breakpoint_name
-//  * @param {int} $direction
-//  * @param {bool} $is_height
-//  * @return {number}
-//  */
-@function b_adjacent_breakpoint_size($breakpoint_name, $direction, $is_height: false) {
-  $adjacent_breakpoint: b_adjacent_breakpoint($breakpoint_name, $direction, $is_height);
+/// Get size of breakpoint adjacent to input breakpoint
+/// @param {string} $breakpoint_name
+/// @param {int} $direction
+/// @param {bool} $is_height
+/// @return {number} *
+@function _adjacent_breakpoint_size($breakpoint_name, $direction, $is_height: false) {
+  $adjacent_breakpoint: _adjacent_breakpoint($breakpoint_name, $direction, $is_height);
   @return list.nth(map.values($adjacent_breakpoint), 1);
 }
 
 
-// /**
-//  * Get name of breakpoint adjacent to input breakpoint
-//  * @param {string} $breakpoint_name
-//  * @param {int} $direction
-//  * @param {bool} $is_height
-//  * @return {string}
-//  */
-@function b_adjacent_breakpoint_name($breakpoint_name, $direction, $is_height: false) {
-  $adjacent_breakpoint: b_adjacent_breakpoint($breakpoint_name, $direction, $is_height);
+/// Get name of breakpoint adjacent to input breakpoint
+/// @param {string} $breakpoint_name
+/// @param {int} $direction
+/// @param {bool} $is_height
+/// @return {string} *
+@function _adjacent_breakpoint_name($breakpoint_name, $direction, $is_height: false) {
+  $adjacent_breakpoint: _adjacent_breakpoint($breakpoint_name, $direction, $is_height);
   @return list.nth(map.keys($adjacent_breakpoint), 1);
 }
 
 
-// /**
-//  * Get size of next smallest breakpoint adjacent to input breakpoint
-//  * @param {string} $breakpoint_name
-//  * @param {bool} $is_height
-//  * @return {string}
-//  */
-@function b_prev_breakpoint_size($breakpoint_name, $is_height) {
-  @return b_adjacent_breakpoint_size($breakpoint_name, -1, $is_height);
+/// Get size of next smallest breakpoint adjacent to input breakpoint
+/// @param {string} $breakpoint_name
+/// @param {bool} $is_height
+/// @return {string} *
+@function _prev_breakpoint_size($breakpoint_name, $is_height) {
+  @return _adjacent_breakpoint_size($breakpoint_name, -1, $is_height);
 }
 
 
-// /**
-//  * Get name of next smallest breakpoint adjacent to input breakpoint
-//  * @param {string} $breakpoint_name
-//  * @param {bool} $is_height
-//  * @return {string}
-//  */
-@function b_prev_breakpoint_name($breakpoint_name, $is_height) {
-  @return b_adjacent_breakpoint_name($breakpoint_name, -1, $is_height);
+/// Get name of next smallest breakpoint adjacent to input breakpoint
+/// @param {string} $breakpoint_name
+/// @param {bool} $is_height
+/// @return {string} *
+@function _prev_breakpoint_name($breakpoint_name, $is_height) {
+  @return _adjacent_breakpoint_name($breakpoint_name, -1, $is_height);
 }
 
 
-// /**
-//  * Get size of next largest breakpoint adjacent to input breakpoint
-//  * @param {string} $breakpoint_name
-//  * @param {bool} $is_height
-//  * @return {string}
-//  */
-@function b_next_breakpoint_size($breakpoint_name, $is_height) {
-  @return b_adjacent_breakpoint_size($breakpoint_name, 1, $is_height);
+/// Get size of next largest breakpoint adjacent to input breakpoint
+/// @param {string} $breakpoint_name
+/// @param {bool} $is_height
+/// @return {string} *
+@function _next_breakpoint_size($breakpoint_name, $is_height) {
+  @return _adjacent_breakpoint_size($breakpoint_name, 1, $is_height);
 }
 
 
-// /**
-//  * Get name of next largest breakpoint adjacent to input breakpoint
-//  * @param {string} $breakpoint_name
-//  * @param {bool} $is_height
-//  * @return {string}
-//  */
-@function b_next_breakpoint_name($breakpoint_name, $is_height) {
-  @return b_adjacent_breakpoint_name($breakpoint_name, 1, $is_height);
+/// Get name of next largest breakpoint adjacent to input breakpoint
+/// @param {string} $breakpoint_name
+/// @param {bool} $is_height
+/// @return {string} *
+@function _next_breakpoint_name($breakpoint_name, $is_height) {
+  @return _adjacent_breakpoint_name($breakpoint_name, 1, $is_height);
 }
 
 
-// /**
-//  * Infer axis property from breakpoint description
-//  * @param {string} $breakpoint
-//  * @return {string}
-//  */
-@function b_get_axis_property($breakpoint) {
+/// Infer axis property from breakpoint description
+/// @param {string} $breakpoint
+/// @return {string} *
+@function _axis_property($breakpoint) {
   @if
     meta.type_of($breakpoint) == string
-    and list.index($b_height_property_markers, b_get_first_word($breakpoint))
+    and list.index($_height_property_markers, _first_word($breakpoint))
   {
     @return 'height';
   }
@@ -178,12 +174,10 @@ $b_height_property_markers: ('height', 'h', 'y');
 }
 
 
-// /**
-//  * Get first word in string
-//  * @param {string} $string
-//  * @return {string}
-//  */
-@function b_get_first_word($string) {
+/// Get first word in string
+/// @param {string} $string
+/// @return {string} *
+@function _first_word($string) {
   $first_word_end_index: string.index($string, ' ');
   @if $first_word_end_index == null {
     @return null;
@@ -193,17 +187,15 @@ $b_height_property_markers: ('height', 'h', 'y');
 }
 
 
-// /**
-//  * Strip axis property from breakpoint
-//  * @param {string} $breakpoint
-//  * @return {string}
-//  */
-@function b_remove_axis_property($breakpoint) {
+/// Strip axis property from breakpoint
+/// @param {string} $breakpoint
+/// @return {string} *
+@function _remove_axis_property($breakpoint) {
   @if
     meta.type_of($breakpoint) == string
     and list.index(
-      list.join($b_width_property_markers, $b_height_property_markers),
-      b_get_first_word($breakpoint)
+      list.join($_width_property_markers, $_height_property_markers),
+      _first_word($breakpoint)
     )
   {
     $breakpoint: string.slice($breakpoint, string.index($breakpoint, ' ') + 1);
@@ -212,12 +204,10 @@ $b_height_property_markers: ('height', 'h', 'y');
 }
 
 
-// /**
-//  * Convert percentage to pixels
-//  * @param {number} $value
-//  * @return {number}
-//  */
-@function b_percent_to_px($value) {
+/// Convert percentage to pixels
+/// @param {number} $value
+/// @return {number} *
+@function _percent_to_px($value) {
   @if math.is_unitless($value) {
     $value: ($value * 1px);
   }
@@ -225,17 +215,15 @@ $b_height_property_markers: ('height', 'h', 'y');
     @return $value;
   }
   
-  @return (b_strip_units(calc($value / 100)) * $global_font_size);
+  @return (_strip_units(calc($value / 100)) * _config(global_font_size));
 }
 
 
-// /**
-//  * Convert pixels to ems
-//  * @param {number} $value
-//  * @return {number}
-//  */
-@function b_px_to_em($value) {
-  @if b_is_zero($value) {
+/// Convert pixels to ems
+/// @param {number} $value
+/// @return {number} *
+@function _px_to_em($value) {
+  @if _is_zero($value) {
     @return 0;
   }
   
@@ -246,19 +234,17 @@ $b_height_property_markers: ('height', 'h', 'y');
     @return $value;
   }
   
-  $global_font_size_px: b_percent_to_px($global_font_size);
+  $global_font_size_px: _percent_to_px(_config(global_font_size));
   $em: (math.round(calc((($value / $global_font_size_px) * 10000) / 10000)));
   @return ($em * 1em);
 }
 
 
-// /**
-//  * Convert ems to pixels
-//  * @param {number} $value
-//  * @return {number}
-//  */
-@function b_em_to_px($value) {
-  @if b_is_zero($value) {
+/// Convert ems to pixels
+/// @param {number} $value
+/// @return {number} *
+@function _em_to_px($value) {
+  @if _is_zero($value) {
     @return 0;
   }
   
@@ -269,31 +255,27 @@ $b_height_property_markers: ('height', 'h', 'y');
     @return $value;
   }
   
-  $global_font_size_px: b_percent_to_px($global_font_size);
+  $global_font_size_px: _percent_to_px(_config(global_font_size));
   $px: (calc($value / 1em) * $global_font_size_px);
   @return $px;
 }
 
 
-// /**
-//  * Is this value zero?
-//  * @param {mixed} $value
-//  * @return {bool}
-//  */
-@function b_is_zero($value) {
+/// Is this value zero?
+/// @param {mixed} $value
+/// @return {bool} *
+@function _is_zero($value) {
   @return
     meta.type_of($value) == number
-    and b_strip_units($value) == 0
+    and _strip_units($value) == 0
   ;
 }
 
 
-// /**
-//  * Strip units from number
-//  * @param {number} $number
-//  * @return {unitless number}
-//  */
-@function b_strip_units($number) {
+/// Strip units from number
+/// @param {number} $number
+/// @return {unitless number} *
+@function _strip_units($number) {
   @if
     meta.type_of($number) == number
     and not math.is_unitless($number)
@@ -301,19 +283,17 @@ $b_height_property_markers: ('height', 'h', 'y');
     $num_length: string.length(#{$number});
     $unit_length: string.length(math.unit($number));
     $unitless: string.slice(#{$number}, 1, ($num_length - $unit_length));
-    @return b_convert_to_number($unitless);
+    @return _convert_to_number($unitless);
   }
   // @warn '"#{$number}" is not a number, or it does not have any units to strip away.';
   @return $number;
 }
 
 
-// /**
-//  * Is this a number as a string?
-//  * @param {mixed} $value
-//  * @return {bool}
-//  */
-@function b_is_number_as_string($value) {
+/// Is this a number as a string?
+/// @param {mixed} $value
+/// @return {bool} *
+@function _is_number_as_string($value) {
   $first_character: string.slice($value, 1, 1);
   $second_character: string.slice($value, 2, 2);
   $numbers: ('0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9);
@@ -333,18 +313,16 @@ $b_height_property_markers: ('height', 'h', 'y');
 }
 
 
-// /**
-//  * Convert string to number
-//  * @link https://hugogiraudel.com/2014/01/15/sass_string_to_number/
-//  * @author Hugo Giraudel
-//  * @param {String | Number} $value - Value to be parsed
-//  * @return {Number}
-//  */
-@function b_convert_to_number($value) {
+/// Convert string to number
+/// @link https://kittygiraudel.com/2014/01/15/sass_string_to_number/
+/// @author Kitty Giraudel
+/// @param {String | Number} $value - Value to be parsed
+/// @return {Number} *
+@function _convert_to_number($value) {
   @if meta.type_of($value) == number {
     @return $value;
   } @else if meta.type_of($value) != string {
-    @error 'Value for b_convert_to_number() should be a number or a string';
+    @error 'Value for _convert_to_number() should be a number or a string';
   }
   
   $result: 0;
@@ -359,7 +337,7 @@ $b_height_property_markers: ('height', 'h', 'y');
       $character == '.'
       or list.index(map.keys($numbers), $character)
     ) {
-      @return b_append_unit_to_value(if($is_negative, ($result * -1), $result), string.slice($value, $i));
+      @return _append_unit_to_value(if($is_negative, ($result * -1), $result), string.slice($value, $i));
     }
     
     @if $character == '.' {
@@ -376,15 +354,13 @@ $b_height_property_markers: ('height', 'h', 'y');
 }
 
 
-// /**
-//  * Append unit to numeric value
-//  * @link https://hugogiraudel.com/2014/01/15/sass_string_to_number/
-//  * @author Hugo Giraudel
-//  * @param {Number} $value - Value to add unit to
-//  * @param {String} $unit - String representation of the unit
-//  * @return {Number} - `$value` expressed in `$unit`
-//  */
-@function b_append_unit_to_value($value, $unit) {
+/// Append unit to numeric value
+/// @link https://kittygiraudel.com/2014/01/15/sass_string_to_number/
+/// @author Kitty Giraudel
+/// @param {Number} $value - Value to add unit to
+/// @param {String} $unit - String representation of the unit
+/// @return {Number} - `$value` expressed in `$unit`
+@function _append_unit_to_value($value, $unit) {
   $units: ('px': 1px, 'cm': 1cm, 'mm': 1mm, '%': 1%, 'ch': 1ch, 'pc': 1pc, 'in': 1in, 'em': 1em, 'rem': 1rem, 'pt': 1pt, 'ex': 1ex, 'vw': 1vw, 'vh': 1vh, 'vmin': 1vmin, 'vmax': 1vmax);
   @if not list.index(map.keys($units), $unit) {
     @error 'Invalid unit: #{$unit}';
@@ -394,65 +370,57 @@ $b_height_property_markers: ('height', 'h', 'y');
 }
 
 
-// /**
-//  * Throw error for undefined breakpoint
-//  * @param {string} $breakpoint_name
-//  * @return {string}
-//  */
-@function b_unknown_breakpoint_error($breakpoint_name) {
+/// Throw error for undefined breakpoint
+/// @param {string} $breakpoint_name
+/// @return {string} *
+@function _unknown_breakpoint_error($breakpoint_name) {
   @return 'Unknown breakpoint name: #{$breakpoint_name}';
 }
 
 
-// /**
-//  * Throw error for too many breakpoints specified for operator
-//  * @param {string} $breakpoint_name
-//  * @return {string}
-//  */
-@function b_too_many_arguments_error($breakpoint_name) {
+/// Throw error for too many breakpoints specified for operator
+/// @param {string} $breakpoint_name
+/// @return {string} *
+@function _too_many_arguments_error($breakpoint_name) {
   @return 'Too many breakpoint names in media query: #{$breakpoint_name}';
 }
 
 
-// /**
-//  * Generate media query
-//  * @param {string/number} $breakpoint
-//  * @param {number} $scale
-//  * @return {string}
-//  */
+/// Generate media query
+/// @param {string | number} $breakpoint
+/// @param {number} $scale
+/// @return {string} *
 @function b($breakpoint, $scale: 0) {
   @return breakbeat($breakpoint, $scale);
 }
 
 
-// /**
-//  * Generate media query
-//  * @param {string/number} $breakpoint
-//  * @param {number} $scale
-//  * @param {bool} $allow_null
-//  * @param {bool} $return_size
-//  * @return {string}
-//  */
+/// Generate media query
+/// @param {string | number} $breakpoint
+/// @param {number} $scale
+/// @param {bool} $allow_null
+/// @param {bool} $return_size
+/// @return {string} *
 @function breakbeat($breakpoint, $scale: 0, $allow_null: false, $return_size: false) {
   $is_height: false;
   $breakpoints_map: $breakpoints;
   
   // Set axis property and remove opposite axis from breakpoints map
-  $axis_property: b_get_axis_property($breakpoint);
-  @if $axis_property == 'height' {
+  $axis_property: _axis_property($breakpoint);
+  @if $axis_property == _config(height_breakpoints_key) {
     $is_height: true;
-    $breakpoints_map: b_get_height_breakpoints_map($breakpoints_map);
+    $breakpoints_map: _height_breakpoints_map($breakpoints_map);
   } @else {
-    $breakpoints_map: map.remove($breakpoints_map, $height_breakpoints_key);
+    $breakpoints_map: map.remove($breakpoints_map, _config(height_breakpoints_key));
   }
-  $breakpoint: b_remove_axis_property($breakpoint);
+  $breakpoint: _remove_axis_property($breakpoint);
   
   // Parse operator and breakpoint name
   $operator: '>=';
   $breakpoint_name: $breakpoint;
   @if
     meta.type_of($breakpoint) == string
-    and not b_is_number_as_string($breakpoint)
+    and not _is_number_as_string($breakpoint)
   {
     @if string.index($breakpoint, ' ') != null {
       $operator: string.slice($breakpoint, 1, string.index($breakpoint, ' ') - 1);
@@ -461,19 +429,19 @@ $b_height_property_markers: ('height', 'h', 'y');
     
     @if
       string.index($breakpoint_name, ' ')
-      and list.index(('><', '<>'), $operator) == null
+      and list.index(($_between_operator, $_outside_operator), $operator) == null
     {
-      @error b_too_many_arguments_error($breakpoint_name);
+      @error _too_many_arguments_error($breakpoint_name);
     }
   }
   
   // Get numerical value of breakpoint
   $breakpoint_size: null;
   @if meta.type_of($breakpoint_name) == string {
-    @if not b_is_number_as_string($breakpoint_name) {
+    @if not _is_number_as_string($breakpoint_name) {
       $breakpoint_size: map.get($breakpoints_map, $breakpoint_name);
     } @else {
-      $breakpoint_size: b_convert_to_number($breakpoint_name);
+      $breakpoint_size: _convert_to_number($breakpoint_name);
     }
   } @else {
     $breakpoint_size: $breakpoint_name;
@@ -482,7 +450,7 @@ $b_height_property_markers: ('height', 'h', 'y');
     $breakpoint_size == null
     and string.index($breakpoint_name, ' ') == null
   {
-    @error b_unknown_breakpoint_error($breakpoint_name);
+    @error _unknown_breakpoint_error($breakpoint_name);
   }
   
   // Build media query
@@ -491,30 +459,30 @@ $b_height_property_markers: ('height', 'h', 'y');
   // This breakpoint and larger: >=
   @if $operator == '>=' {
     @if $scale != 0 {
-      $next_size: b_next_breakpoint_size($breakpoint_name, $is_height);
+      $next_size: _next_breakpoint_size($breakpoint_name, $is_height);
       $breakpoint_size: math.round($breakpoint_size + (($next_size - $breakpoint_size) * $scale));
     }
-    @if $output_em_queries {
-      $breakpoint_size: b_px_to_em($breakpoint_size);
+    @if _config(output_em_queries) {
+      $breakpoint_size: _px_to_em($breakpoint_size);
     }
-    @if not b_is_zero($breakpoint_size) {
+    @if not _is_zero($breakpoint_size) {
       $media_query: 'min-#{$axis_property}: #{$breakpoint_size}';
     }
   }
   
   // Larger than this breakpoint: >
   @else if $operator == '>' {
-    $next_size: b_next_breakpoint_size($breakpoint_name, $is_height);
+    $next_size: _next_breakpoint_size($breakpoint_name, $is_height);
     
     @if $scale != 0 {
-      $next_name: b_next_breakpoint_name($breakpoint_name, $is_height);
-      $next_next_name: b_next_breakpoint_name($next_name, $is_height);
-      $next_next_size: b_next_breakpoint_size($next_name, $is_height);
+      $next_name: _next_breakpoint_name($breakpoint_name, $is_height);
+      $next_next_name: _next_breakpoint_name($next_name, $is_height);
+      $next_next_size: _next_breakpoint_size($next_name, $is_height);
       $next_size: math.round($next_size + (($next_next_size - $next_size) * $scale));
     }
     
-    @if $output_em_queries {
-      $next_size: b_px_to_em($next_size);
+    @if _config(output_em_queries) {
+      $next_size: _px_to_em($next_size);
     }
     
     $media_query: 'min-#{$axis_property}: #{$next_size}';
@@ -522,17 +490,17 @@ $b_height_property_markers: ('height', 'h', 'y');
   
   // This breakpoint and smaller: <=
   @else if $operator == '<=' {
-    $next_size: b_next_breakpoint_size($breakpoint_name, $is_height);
+    $next_size: _next_breakpoint_size($breakpoint_name, $is_height);
     
     @if $scale != 0 {
       $next_size: math.round($breakpoint_size + (($next_size - $breakpoint_size) * $scale));
     }
     
     @if $next_size != $breakpoint_size {
-      $next_size: ($next_size - 1px);
+      $next_size: ($next_size - $_range_modifier);
       
-      @if $output_em_queries {
-        $next_size: b_px_to_em($next_size);
+      @if _config(output_em_queries) {
+        $next_size: _px_to_em($next_size);
       }
       
       $media_query: 'max-#{$axis_property}: #{$next_size}';
@@ -542,40 +510,40 @@ $b_height_property_markers: ('height', 'h', 'y');
   // Smaller than this breakpoint: <
   @else if $operator == '<' {
     @if $scale != 0 {
-      $prev_size: b_prev_breakpoint_size($breakpoint_name, $is_height);
+      $prev_size: _prev_breakpoint_size($breakpoint_name, $is_height);
       $breakpoint_size: math.round($breakpoint_size - (($breakpoint_size - $prev_size) * $scale));
     }
     @if $breakpoint_size <= 0 {
-      $breakpoint_size: b_next_breakpoint_size($breakpoint_name, $is_height);
+      $breakpoint_size: _next_breakpoint_size($breakpoint_name, $is_height);
     }
-    $breakpoint_size: ($breakpoint_size - 1px);
+    $breakpoint_size: ($breakpoint_size - $_range_modifier);
     
-    @if $output_em_queries {
-      $breakpoint_size: b_px_to_em($breakpoint_size);
+    @if _config(output_em_queries) {
+      $breakpoint_size: _px_to_em($breakpoint_size);
     }
     
     $media_query: 'max-#{$axis_property}: #{$breakpoint_size}';
   }
   
   // Between two breakpoints, inclusive: ><
-  @else if $operator == '><' {
+  @else if $operator == $_between_operator {
     @if string.index($breakpoint_name, ' ') == null {
-      @error 'Between >< operator requires two breakpoint names';
+      @error 'Between #{$_between_operator} operator requires two breakpoint names';
     }
     
     $first_name: string.slice($breakpoint_name, 1, string.index($breakpoint_name, ' ') - 1);
     $second_name: string.slice($breakpoint_name, string.index($breakpoint_name, ' ') + 1);
     $breakpoint_size: map.get($breakpoints_map, $first_name);
-    $next_name: b_next_breakpoint_name($second_name, $is_height);
-    $next_size: (b_next_breakpoint_size($second_name, $is_height) - 1px);
+    $next_name: _next_breakpoint_name($second_name, $is_height);
+    $next_size: (_next_breakpoint_size($second_name, $is_height) - $_range_modifier);
     
-    @if $output_em_queries {
-      $breakpoint_size: b_px_to_em($breakpoint_size);
-      $next_size: b_px_to_em($next_size);
+    @if _config(output_em_queries) {
+      $breakpoint_size: _px_to_em($breakpoint_size);
+      $next_size: _px_to_em($next_size);
     }
     
     @if
-      b_is_zero($breakpoint_size)
+      _is_zero($breakpoint_size)
       and $second_name != $next_name
     {
       $media_query: 'max-#{$axis_property}: #{$next_size}';
@@ -585,13 +553,13 @@ $b_height_property_markers: ('height', 'h', 'y');
       and $second_name != $next_name
     {
       $media_query: 'min-#{$axis_property}: #{$breakpoint_size}) and (max-#{$axis_property}: #{$next_size}';
-    } @else if not b_is_zero($breakpoint_size) {
+    } @else if not _is_zero($breakpoint_size) {
       $media_query: 'min-#{$axis_property}: #{$breakpoint_size}';
     }
   }
   
   // Outside of a breakpoint or a range of breakpoints: <>
-  @else if $operator == '<>' {
+  @else if $operator == $_outside_operator {
     $first_name: $breakpoint_name;
     $second_name: $breakpoint_name;
     @if string.index($breakpoint_name, ' ') != null {
@@ -599,13 +567,13 @@ $b_height_property_markers: ('height', 'h', 'y');
       $second_name: string.slice($breakpoint_name, string.index($breakpoint_name, ' ') + 1);
     }
     
-    $lower_range_size: (map.get($breakpoints_map, $first_name) - 1px);
-    $upper_range_name: b_next_breakpoint_name($second_name, $is_height);
-    $upper_range_size: b_next_breakpoint_size($second_name, $is_height);
+    $lower_range_size: (map.get($breakpoints_map, $first_name) - $_range_modifier);
+    $upper_range_name: _next_breakpoint_name($second_name, $is_height);
+    $upper_range_size: _next_breakpoint_size($second_name, $is_height);
     
-    @if $output_em_queries {
-      $lower_range_size: b_px_to_em($lower_range_size);
-      $upper_range_size: b_px_to_em($upper_range_size);
+    @if _config(output_em_queries) {
+      $lower_range_size: _px_to_em($lower_range_size);
+      $upper_range_size: _px_to_em($upper_range_size);
     }
     
     @if
@@ -619,28 +587,28 @@ $b_height_property_markers: ('height', 'h', 'y');
       and $second_name != $upper_range_name
     {
       $media_query: 'max-#{$axis_property}: #{$lower_range_size}), (min-#{$axis_property}: #{$upper_range_size}';
-    } @else if not b_is_zero($lower_range_size) {
+    } @else if not _is_zero($lower_range_size) {
       $media_query: 'max-#{$axis_property}: #{$lower_range_size}';
     }
   }
   
   // Within this breakpoint only: =
   @else if list.index(('=', '==', '==='), $operator) {
-    $next_name: b_next_breakpoint_name($breakpoint_name, $is_height);
-    $next_size: b_next_breakpoint_size($breakpoint_name, $is_height);
+    $next_name: _next_breakpoint_name($breakpoint_name, $is_height);
+    $next_size: _next_breakpoint_size($breakpoint_name, $is_height);
     @if $scale < 0 {
       $next_size: math.round($breakpoint_size + (($next_size - $breakpoint_size) * math.abs($scale)));
     } @else if $scale > 0 {
       $breakpoint_size: math.round($breakpoint_size + (($next_size - $breakpoint_size) * $scale));
     }
-    $next_size: ($next_size - 1px);
+    $next_size: ($next_size - $_range_modifier);
     
-    @if $output_em_queries {
-      $breakpoint_size: b_px_to_em($breakpoint_size);
-      $next_size: b_px_to_em($next_size);
+    @if _config(output_em_queries) {
+      $breakpoint_size: _px_to_em($breakpoint_size);
+      $next_size: _px_to_em($next_size);
     }
     
-    @if b_is_zero($breakpoint_size) {
+    @if _is_zero($breakpoint_size) {
       $media_query: 'max-#{$axis_property}: #{$next_size}';
     } @else if
       $next_name != $breakpoint_name
@@ -668,11 +636,9 @@ $b_height_property_markers: ('height', 'h', 'y');
 }
 
 
-// /**
-//  * Output CSS rules wrapped in media query
-//  * @param {string/number} $breakpoint
-//  * @param {number} $scale
-//  */
+/// Output CSS rules wrapped in media query
+/// @param {string | number} $breakpoint
+/// @param {number} $scale
 @mixin b($breakpoint, $scale: 0) {
   @include breakbeat($breakpoint, $scale) {
     @content;
@@ -680,19 +646,17 @@ $b_height_property_markers: ('height', 'h', 'y');
 }
 
 
-// /**
-//  * Output CSS rules wrapped in media query
-//  * @param {string/number} $breakpoint
-//  * @param {number} $scale
-//  */
+/// Output CSS rules wrapped in media query
+/// @param {string | number} $breakpoint
+/// @param {number} $scale
 @mixin breakbeat($breakpoint, $scale: 0) {
   $media_query: breakbeat($breakpoint, $scale, $allow_null: true);
-  $axis_property: b_get_axis_property($breakpoint);
-  $breakpoint: b_remove_axis_property($breakpoint);
+  $axis_property: _axis_property($breakpoint);
+  $breakpoint: _remove_axis_property($breakpoint);
   
   @if $media_query != null {
     @media #{$media_query} {
-      @if $output_query_comments {
+      @if _config(output_query_comments) {
         $report: $breakpoint;
         @if $scale != 0 {
           $report: '#{$report}, scale #{$scale}';

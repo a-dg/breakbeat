@@ -18,47 +18,50 @@ Breakbeat allows you to build media queries simply. It’s usually as simple as 
 
 ## Configuration
 
-**Step 1:** Begin by setting the media query output type.
+**Step 1:** Import the Breakbeat mixin and function.
 
 ```scss
-$output_em_queries: true; // Outputs px if false
+@use 'breakbeat' as *;
 ```
 
 **Step 2:** Define your breakpoints, using the minimum width value for each range. Breakpoints must be defined in ascending order, and the first value should be `0`.
 
 ```scss
-$breakpoints: (
-  tiny: 0,
-  small: 460px,
-  medium: 640px,
-  average: 820px,
-  large: 1024px,
-  xlarge: 1280px,
-);
+@include configure((
+  breakpoints: (
+    tiny: 0,
+    small: 460px,
+    medium: 640px,
+    average: 820px,
+    large: 1024px,
+    xlarge: 1280px,
+  ),
+));
 ```
 
 **Step 3:** Optionally define a separate set of height breakpoints in the key `height` within `$breakpoints`, using the same guidelines as the width breakpoints. Height breakpoints are completely separate from width breakpoints, so their names and values can be the same or totally different, it doesn’t matter.
 
 ```scss
-$breakpoints: (
-  tiny: 0,
-  small: 460px,
-  medium: 640px,
-  average: 820px,
-  large: 1024px,
-  xlarge: 1280px,
-  height: (
-    wee: 0,
-    petite: 300px,
-    medium: 480px,
+@include configure((
+  breakpoints: (
+    // ...
+    height: (
+      wee: 0,
+      petite: 300px,
+      medium: 480px,
+    ),
   ),
-);
+));
 ```
 
-**Step 4:** Import the Breakbeat mixin and function.
+**Step 4:** Optionally set the media query output type, and whether you want CSS comments for every media query.
 
 ```scss
-@import 'breakbeat';
+@include configure((
+  // ...
+  output_em_queries: true, // Outputs px if false
+  output_query_comments: true,
+));
 ```
 
 
@@ -233,7 +236,7 @@ Naturally, the comparison operator used affects the meaning of the `scale` value
 
 There are endless possibilities for quickly tweaking layout issues occurring within specific breakpoint ranges, without having to create additional breakpoints.
 
->  Since scaling controls deviation from the initial value, scaling by `0` does not obliterate the breakpoint through multiplication, but alters it by a factor of `0`, just as if the `scale` argument were omitted. Likewise, scaling by `1` does not multiply the value by `1`, but rather offsets the initial value by `100%`.
+> Since scaling controls deviation from the initial value, scaling by `0` does not obliterate the breakpoint through multiplication, but alters it by a factor of `0`, just as if the `scale` argument were omitted. Likewise, scaling by `1` does not multiply the value by `1`, but rather offsets the initial value by `100%`.
 
 
 ## Breakpoint name interpolation
