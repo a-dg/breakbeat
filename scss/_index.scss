@@ -1,4 +1,4 @@
-// Breakbeat v3.0
+// Breakbeat v4.0
 
 @use 'sass:math';
 @use 'sass:string';
@@ -69,7 +69,7 @@ $_range_modifier: 0.02px;
 /// Get breakpoint adjacent to input breakpoint
 /// @param {string} $breakpoint_name
 /// @param {int} $direction
-/// @param {bool} $is_height
+/// @param {boolean} $is_height
 /// @return {map} *
 @function _adjacent_breakpoint($breakpoint_name, $direction, $is_height: false) {
   $breakpoints_map: $breakpoints;
@@ -104,7 +104,7 @@ $_range_modifier: 0.02px;
 /// Get size of breakpoint adjacent to input breakpoint
 /// @param {string} $breakpoint_name
 /// @param {int} $direction
-/// @param {bool} $is_height
+/// @param {boolean} $is_height
 /// @return {number} *
 @function _adjacent_breakpoint_size($breakpoint_name, $direction, $is_height: false) {
   $adjacent_breakpoint: _adjacent_breakpoint($breakpoint_name, $direction, $is_height);
@@ -115,7 +115,7 @@ $_range_modifier: 0.02px;
 /// Get name of breakpoint adjacent to input breakpoint
 /// @param {string} $breakpoint_name
 /// @param {int} $direction
-/// @param {bool} $is_height
+/// @param {boolean} $is_height
 /// @return {string} *
 @function _adjacent_breakpoint_name($breakpoint_name, $direction, $is_height: false) {
   $adjacent_breakpoint: _adjacent_breakpoint($breakpoint_name, $direction, $is_height);
@@ -125,7 +125,7 @@ $_range_modifier: 0.02px;
 
 /// Get size of next smallest breakpoint adjacent to input breakpoint
 /// @param {string} $breakpoint_name
-/// @param {bool} $is_height
+/// @param {boolean} $is_height
 /// @return {string} *
 @function _prev_breakpoint_size($breakpoint_name, $is_height) {
   @return _adjacent_breakpoint_size($breakpoint_name, -1, $is_height);
@@ -134,7 +134,7 @@ $_range_modifier: 0.02px;
 
 /// Get name of next smallest breakpoint adjacent to input breakpoint
 /// @param {string} $breakpoint_name
-/// @param {bool} $is_height
+/// @param {boolean} $is_height
 /// @return {string} *
 @function _prev_breakpoint_name($breakpoint_name, $is_height) {
   @return _adjacent_breakpoint_name($breakpoint_name, -1, $is_height);
@@ -143,7 +143,7 @@ $_range_modifier: 0.02px;
 
 /// Get size of next largest breakpoint adjacent to input breakpoint
 /// @param {string} $breakpoint_name
-/// @param {bool} $is_height
+/// @param {boolean} $is_height
 /// @return {string} *
 @function _next_breakpoint_size($breakpoint_name, $is_height) {
   @return _adjacent_breakpoint_size($breakpoint_name, 1, $is_height);
@@ -152,7 +152,7 @@ $_range_modifier: 0.02px;
 
 /// Get name of next largest breakpoint adjacent to input breakpoint
 /// @param {string} $breakpoint_name
-/// @param {bool} $is_height
+/// @param {boolean} $is_height
 /// @return {string} *
 @function _next_breakpoint_name($breakpoint_name, $is_height) {
   @return _adjacent_breakpoint_name($breakpoint_name, 1, $is_height);
@@ -263,7 +263,7 @@ $_range_modifier: 0.02px;
 
 /// Is this value zero?
 /// @param {mixed} $value
-/// @return {bool} *
+/// @return {boolean} *
 @function _is_zero($value) {
   @return
     meta.type_of($value) == number
@@ -292,7 +292,7 @@ $_range_modifier: 0.02px;
 
 /// Is this a number as a string?
 /// @param {mixed} $value
-/// @return {bool} *
+/// @return {boolean} *
 @function _is_number_as_string($value) {
   $first_character: string.slice($value, 1, 1);
   $second_character: string.slice($value, 2, 2);
@@ -398,8 +398,8 @@ $_range_modifier: 0.02px;
 /// Generate media query
 /// @param {string | number} $breakpoint
 /// @param {number} $scale
-/// @param {bool} $allow_null
-/// @param {bool} $return_size
+/// @param {boolean} $allow_null
+/// @param {boolean} $return_size
 /// @return {string} *
 @function breakbeat($breakpoint, $scale: 0, $allow_null: false, $return_size: false) {
   $is_height: false;
@@ -525,36 +525,28 @@ $_range_modifier: 0.02px;
     $media_query: 'max-#{$axis_property}: #{$breakpoint_size}';
   }
   
-  // Between two breakpoints, inclusive: ><
+  // Between two breakpoints: ><
   @else if $operator == $_between_operator {
     @if string.index($breakpoint_name, ' ') == null {
       @error 'Between #{$_between_operator} operator requires two breakpoint names';
     }
     
     $first_name: string.slice($breakpoint_name, 1, string.index($breakpoint_name, ' ') - 1);
+    $first_size: map.get($breakpoints_map, $first_name);
     $second_name: string.slice($breakpoint_name, string.index($breakpoint_name, ' ') + 1);
-    $breakpoint_size: map.get($breakpoints_map, $first_name);
-    $next_name: _next_breakpoint_name($second_name, $is_height);
-    $next_size: (_next_breakpoint_size($second_name, $is_height) - $_range_modifier);
+    $second_size: (map.get($breakpoints_map, $second_name) - $_range_modifier);
     
     @if _config(output_em_queries) {
-      $breakpoint_size: _px_to_em($breakpoint_size);
-      $next_size: _px_to_em($next_size);
+      $first_size: _px_to_em($first_size);
+      $second_size: _px_to_em($second_size);
     }
     
-    @if
-      _is_zero($breakpoint_size)
-      and $second_name != $next_name
-    {
-      $media_query: 'max-#{$axis_property}: #{$next_size}';
-    } @else if
-      $next_name != $first_name
-      and $breakpoint_size < $next_size
-      and $second_name != $next_name
-    {
-      $media_query: 'min-#{$axis_property}: #{$breakpoint_size}) and (max-#{$axis_property}: #{$next_size}';
-    } @else if not _is_zero($breakpoint_size) {
-      $media_query: 'min-#{$axis_property}: #{$breakpoint_size}';
+    @if _is_zero($first_size) {
+      $media_query: 'max-#{$axis_property}: #{$second_size}';
+    } @else if $first_size < $second_size {
+      $media_query: 'min-#{$axis_property}: #{$first_size}) and (max-#{$axis_property}: #{$second_size}';
+    } @else if not _is_zero($first_size) {
+      $media_query: 'min-#{$axis_property}: #{$first_size}';
     }
   }
   

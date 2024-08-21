@@ -122,14 +122,14 @@ Note that the `>` and `<` operators *exclude* the specified breakpoint. For exam
 
 ### Between operator
 
-The `><` operator takes two breakpoint names as arguments, and includes both of them within the resulting range. In the following example, the entire span of `small`, `medium`, and `average` breakpoints are included in the resulting media query. The next largest breakpoint, `large`, has a minimum width of `1024px`, so the top end of `average` is the maximum, at `1023px`.
+The `><` operator takes two breakpoint names as arguments, and includes the range between them, up to but not including the second breakpoint. In the following example, the entire span of `small`, `medium`, and `average` breakpoints are included in the resulting media query. The second breakpoint in the arguments, `large`, has a minimum width of `1024px`, so the top end of `average` is the maximum, at `1023.98px`.
 
 ```scss
-// Between small and average, inclusive
-@include b('>< small average') {}
+// Between small and large
+@include b('>< small large') {}
 
 // Output
-@media (min-width: 460px) and (max-width: 1023px) {}
+@media (min-width: 460px) and (max-width: 1023.98px) {}
 ```
 
 ### Outside operator
@@ -141,7 +141,7 @@ The `<>` operator takes one or two breakpoint names as arguments, and excludes t
 @include b('<> medium average') {}
 
 // Output
-@media (max-width: 639px), (min-width: 1024px) {}
+@media (max-width: 639.98px), (min-width: 1024px) {}
 ```
 
 
@@ -195,7 +195,7 @@ To target the upper half of `small`, we scale the range by `0.5`:
 @include b('= small', 0.5) {}
 
 // Output
-@media (min-width: 300px) and (max-width: 599px) {}
+@media (min-width: 300px) and (max-width: 599.98px) {}
 ```
 
 The result is that we’ve narrowed the range of the media query to affect only the upper half of the range normally covered by `small`. (We know it’s the *upper* half, because we’re using a positive value for `scale`.)
@@ -208,10 +208,10 @@ The same technique applied to the `medium` breakpoint results in a much smaller 
 @include b('= medium', 0.5) {}
 
 // Output
-@media (min-width: 700px) and (max-width: 799px) {}
+@media (min-width: 700px) and (max-width: 799.98px) {}
 ```
 
-The same `scale` value applied to the `medium` breakpoint results in only a `99px` range, due to its proximity to the `large` breakpoint.
+The same `scale` value applied to the `medium` breakpoint results in only a `99.98px` range, due to its proximity to the `large` breakpoint.
 
 `scale` can be any number, but it is most useful when it’s some floating point value between `-1` and `1`. Positive values narrow the range toward the top end of a breakpoint, whereas negative values narrow the range toward the bottom end.
 
@@ -221,7 +221,7 @@ The same `scale` value applied to the `medium` breakpoint results in only a `99p
 @include b('= medium', -0.5) {}
 
 // Output
-@media (min-width: 600px) and (max-width: 699px) {}
+@media (min-width: 600px) and (max-width: 699.98px) {}
 ```
 
 Naturally, the comparison operator used affects the meaning of the `scale` value.
@@ -264,7 +264,7 @@ $breakpoints: (
 
 @include b('>= small')         // No media query
 @include b('<= large')         // No media query
-@include b('< small')          // @media (max-width: 599px)
+@include b('< small')          // @media (max-width: 599.98px)
 @include b('> large')          // @media (min-width: 800px)
 @include b('>< small large')   // No media query
 @include b('>< medium large')  // @media (min-width: 600px)
